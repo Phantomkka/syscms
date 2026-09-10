@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Карточка ПК — {{ pc.hostname }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #1a1a2e; }
+        h1 { font-size: 22px; border-bottom: 2px solid #0f3460; padding-bottom: 8px; }
+        h2 { font-size: 16px; color: #0f3460; margin-top: 24px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { width: 160px; font-weight: 600; color: #555; background: #f8f9fa; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        .print-btn { background: #0f3460; color: #fff; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .print-btn:hover { background: #16213e; }
+        @media print { .print-btn { display: none; } }
+        .watermark { text-align: center; color: #ccc; margin-top: 40px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🖥 Инвентарная карточка ПК</h1>
+        <button class="print-btn" onclick="window.print()">🖨 Печать</button>
+    </div>
+
+    <table>
+        <tr><th>Имя ПК</th><td>{{ pc.hostname }}</td></tr>
+        {% if pc.inventory_no %}<tr><th>Инвентарный номер</th><td>{{ pc.inventory_no }}</td></tr>{% endif %}
+        <tr><th>IP-адрес</th><td>{{ pc.ip or '—' }}</td></tr>
+        {% if pc.mac %}<tr><th>MAC-адрес</th><td>{{ pc.mac }}</td></tr>{% endif %}
+    </table>
+
+    <h2>Характеристики</h2>
+    <table>
+        <tr><th>CPU</th><td>{{ pc.cpu or '—' }}</td></tr>
+        <tr><th>RAM</th><td>{{ pc.ram or '—' }}</td></tr>
+        <tr><th>Диск</th><td>{{ pc.hdd or '—' }}</td></tr>
+        <tr><th>OS</th><td>{{ pc.os or '—' }}</td></tr>
+    </table>
+
+    {% if company %}
+    <h2>Компания</h2>
+    <table>
+        <tr><th>Название</th><td>{{ company.name }}</td></tr>
+        {% if company.inn %}<tr><th>ИНН</th><td>{{ company.inn }}</td></tr>{% endif %}
+        {% if company.phone %}<tr><th>Телефон</th><td>{{ company.phone }}</td></tr>{% endif %}
+        {% if company.email %}<tr><th>Email</th><td>{{ company.email }}</td></tr>{% endif %}
+        {% if company.address %}<tr><th>Адрес</th><td>{{ company.address }}</td></tr>{% endif %}
+    </table>
+    {% endif %}
+
+    {% if sa %}
+    <h2>Ответственный</h2>
+    <table>
+        <tr><th>ФИО</th><td>{{ sa.full_name or '—' }}</td></tr>
+        <tr><th>Telegram</th><td>{{ sa.telegram or '—' }}</td></tr>
+        <tr><th>Телефон</th><td>{{ sa.phone or '—' }}</td></tr>
+    </table>
+    {% endif %}
+
+    <div class="watermark">
+        Сформировано: {{ pc.created_at or '' }} | SysCMS
+    </div>
+</body>
+</html>

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}Компании — SysCMS{% endblock %}
+
+{% block content %}
+<h1>🏢 Компании</h1>
+<a href="#" class="btn btn-primary" onclick="document.getElementById('addForm').style.display='block'; return false;">+ Добавить компанию</a>
+
+<div id="addForm" class="card" style="display:none; margin-top:16px;">
+    <h3>Новая компания</h3>
+    <form method="POST" action="{{ url_for('company_add') }}" class="inline">
+        <div class="form-group">
+            <label>Название *</label>
+            <input type="text" name="name" required>
+        </div>
+        <div class="form-group">
+            <label>ИНН</label>
+            <input type="text" name="inn">
+        </div>
+        <div class="form-group">
+            <label>КПП</label>
+            <input type="text" name="kpp">
+        </div>
+        <div class="form-group">
+            <label>Телефон</label>
+            <input type="text" name="phone">
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email">
+        </div>
+        <div class="form-group">
+            <label>Адрес</label>
+            <input type="text" name="address">
+        </div>
+        <button type="submit" class="btn btn-primary">Создать</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addForm').style.display='none'">Отмена</button>
+    </form>
+</div>
+
+<div class="card" style="margin-top:20px;">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Название</th>
+                <th>Телефон</th>
+                <th>Email</th>
+                <th>ПК</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for c in companies %}
+            <tr>
+                <td>{{ c.id }}</td>
+                <td><a href="{{ url_for('company_pcs', cid=c.id) }}" class="company-link">{{ c.name }}</a></td>
+                <td>{{ c.phone or '—' }}</td>
+                <td>{{ c.email or '—' }}</td>
+                <td><a href="{{ url_for('company_pcs', cid=c.id) }}">{{ c.pc_count }}</a></td>
+                <td>
+                    <div class="actions">
+                        <button class="btn btn-primary btn-sm" onclick="editCompany({{ c.id }}, '{{ c.name }}', '{{ c.inn or '' }}', '{{ c.kpp or '' }}', '{{ c.phone or '' }}', '{{ c.email or '' }}', '{{ c.address or '' }}')">✏️</button>
+                        <form method="POST" action="{{ url_for('company_delete', cid=c.id) }}" style="display:inline" onsubmit="return confirm('Удалить компанию?')">
+                            <button class="btn btn-danger btn-sm">🗑</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6" style="text-align:center;color:#999;padding:32px;">Нет компаний</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<form id="editForm" method="POST" style="display:none;">
+    <div class="card">
+        <h3>Редактирование</h3>
+        <div class="form-group">
+            <label>Название *</label>
+            <input type="text" name="name" id="edit_name" required>
+        </div>
+        <div class="form-group"><label>ИНН</label><input type="text" name="inn" id="edit_inn"></div>
+        <div class="form-group"><label>КПП</label><input type="text" name="kpp" id="edit_kpp"></div>
+        <div class="form-group"><label>Телефон</label><input type="text" name="phone" id="edit_phone"></div>
+        <div class="form-group"><label>Email</label><input type="email" name="email" id="edit_email"></div>
+        <div class="form-group"><label>Адрес</label><input type="text" name="address" id="edit_address"></div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('editForm').style.display='none'">Отмена</button>
+    </div>
+</form>
+
+<script>
+function editCompany(id, name, inn, kpp, phone, email, address) {
+    document.getElementById('edit_name').value = name;
+    document.getElementById('edit_inn').value = inn;
+    document.getElementById('edit_kpp').value = kpp;
+    document.getElementById('edit_phone').value = phone;
+    document.getElementById('edit_email').value = email;
+    document.getElementById('edit_address').value = address;
+    document.getElementById('editForm').action = "{{ url_for('company_edit', cid=0) }}".replace('0', id);
+    document.getElementById('editForm').style.display = 'block';
+    document.getElementById('editForm').scrollIntoView({behavior:'smooth'});
+}
+</script>
+{% endblock %}

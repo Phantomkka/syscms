@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Сисадмины — SysCMS{% endblock %}
+
+{% block content %}
+<h1>👨‍💼 Сисадмины</h1>
+<a href="#" class="btn btn-primary" onclick="document.getElementById('addForm').style.display='block'; return false;">+ Добавить сисадмина</a>
+
+<div id="addForm" class="card" style="display:none; margin-top:16px;">
+    <h3>Новый сисадмин</h3>
+    <form method="POST" action="{{ url_for('sysadmin_add') }}" class="inline">
+        <div class="form-group">
+            <label>Логин *</label>
+            <input type="text" name="username" required>
+        </div>
+        <div class="form-group">
+            <label>Пароль *</label>
+            <input type="password" name="password" required>
+        </div>
+        <div class="form-group"><label>ФИО</label><input type="text" name="full_name"></div>
+        <div class="form-group"><label>Telegram</label><input type="text" name="telegram" placeholder="@username"></div>
+        <div class="form-group"><label>Телефон</label><input type="text" name="phone"></div>
+        <div class="form-group"><label>URL фото</label><input type="text" name="photo_url"></div>
+        <div class="form-group"><label>Примечания</label><input type="text" name="notes"></div>
+        <div class="form-group">
+            <label>Компании</label>
+            <select name="company_ids" multiple style="height:auto">
+                {% for c in companies %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+            </select>
+            <small>Ctrl+Click для нескольких</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Создать</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addForm').style.display='none'">Отмена</button>
+    </form>
+</div>
+
+<div class="card" style="margin-top:20px;">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>ФИО</th>
+                <th>Логин</th>
+                <th>Telegram</th>
+                <th>Телефон</th>
+                <th>Компании</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for s in sysadmins %}
+            <tr>
+                <td>{{ s.id }}</td>
+                <td><a href="{{ url_for('sysadmin_card', sid=s.id) }}" class="sa-link">{{ s.full_name or '—' }}</a></td>
+                <td>{{ s.username }}</td>
+                <td>{{ s.telegram or '—' }}</td>
+                <td>{{ s.phone or '—' }}</td>
+                <td>{{ s.companies or '<span style="color:#ccc">—</span>' }}</td>
+                <td>
+                    <div class="actions">
+                        <button class="btn btn-primary btn-sm" onclick="editSA({{ s.id }}, '{{ s.username }}', '{{ s.full_name or '' }}', '{{ s.telegram or '' }}', '{{ s.phone or '' }}', '{{ s.photo_url or '' }}', '{{ s.notes or '' }}')">✏️</button>
+                        <form method="POST" action="{{ url_for('sysadmin_delete', sid=s.id) }}" style="display:inline" onsubmit="return confirm('Удалить?')">
+                            <button class="btn btn-danger btn-sm">🗑</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7" style="text-align:center;color:#999;padding:32px;">Нет сисадминов</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<form id="editFormSA" method="POST" style="display:none;">
+    <div class="card">
+        <h3>Редактирование сисадмина</h3>
+        <div class="form-group">
+            <label>Логин *</label>
+            <input type="text" name="username" id="edit_sa_username" required>
+        </div>
+        <div class="form-group">
+            <label>Пароль (пусто = не менять)</label>
+            <input type="password" name="password" id="edit_sa_pass">
+        </div>
+        <div class="form-group"><label>ФИО</label><input type="text" name="full_name" id="edit_sa_name"></div>
+        <div class="form-group"><label>Telegram</label><input type="text" name="telegram" id="edit_sa_telegram"></div>
+        <div class="form-group"><label>Телефон</label><input type="text" name="phone" id="edit_sa_phone"></div>
+        <div class="form-group"><label>URL фото</label><input type="text" name="photo_url" id="edit_sa_photo"></div>
+        <div class="form-group"><label>Примечания</label><input type="text" name="notes" id="edit_sa_notes"></div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('editFormSA').style.display='none'">Отмена</button>
+    </div>
+</form>
+
+<script>
+function editSA(id, username, name, telegram, phone, photo, notes) {
+    document.getElementById('edit_sa_username').value = username;
+    document.getElementById('edit_sa_pass').value = '';
+    document.getElementById('edit_sa_name').value = name;
+    document.getElementById('edit_sa_telegram').value = telegram;
+    document.getElementById('edit_sa_phone').value = phone;
+    document.getElementById('edit_sa_photo').value = photo;
+    document.getElementById('edit_sa_notes').value = notes;
+    document.getElementById('editFormSA').action = "{{ url_for('sysadmin_edit', sid=0) }}".replace('0', id);
+    document.getElementById('editFormSA').style.display = 'block';
+    document.getElementById('editFormSA').scrollIntoView({behavior:'smooth'});
+}
+</script>
+{% endblock %}

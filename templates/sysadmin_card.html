@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}{{ sa.full_name or 'Сисадмин' }} — SysCMS{% endblock %}
+
+{% block content %}
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+    <a href="{{ url_for('sysadmins_list') }}" class="btn btn-secondary">← Назад</a>
+    <h1 style="margin:0;">👨‍💼 {{ sa.full_name or 'Без имени' }}</h1>
+</div>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;">
+    <!-- Карточка профиля -->
+    <div class="card" style="flex:1;min-width:300px;">
+        <h3>Контактные данные</h3>
+        {% if sa.photo_url %}
+        <div style="text-align:center;margin-bottom:16px;">
+            <img src="{{ sa.photo_url }}" alt="{{ sa.full_name }}" style="max-width:200px;border-radius:8px;" onerror="this.style.display='none'">
+        </div>
+        {% endif %}
+        <table style="width:100%">
+            <tr><td style="font-weight:600;width:140px">Логин:</td><td>{{ sa.username }}</td></tr>
+            <tr><td>ФИО:</td><td>{{ sa.full_name or '—' }}</td></tr>
+            <tr><td>Telegram:</td><td>{{ sa.telegram or '—' }}</td></tr>
+            <tr><td>Телефон:</td><td>{{ sa.phone or '—' }}</td></tr>
+            <tr><td>Примечания:</td><td>{{ sa.notes or '—' }}</td></tr>
+            <tr><td>Компании:</td><td>{{ sa.companies or '—' }}</td></tr>
+        </table>
+    </div>
+
+    <!-- ПК закреплённых компаний -->
+    <div class="card" style="flex:2;min-width:400px;">
+        <h3>ПК в компаниях</h3>
+        <table>
+            <thead>
+                <tr><th>ПК</th><th>Компания</th><th>IP</th><th>OS</th><th>Инв. №</th></tr>
+            </thead>
+            <tbody>
+            {% for p in pcs %}
+                <tr>
+                    <td><a href="{{ url_for('pc_detail', pid=p.id) }}">{{ p.hostname }}</a></td>
+                    <td>{{ p.company_name }}</td>
+                    <td>{{ p.ip or '—' }}</td>
+                    <td>{{ p.os or '—' }}</td>
+                    <td>{{ p.inventory_no or '—' }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">Нет ПК</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Компании сисадмина</h3>
+    <table>
+        <thead><tr><th>Компания</th><th>Телефон</th><th>Email</th><th>ПК</th><th>Действия</th></tr></thead>
+        <tbody>
+        {% for c in companies %}
+            <tr>
+                <td><a href="{{ url_for('company_pcs', cid=c.id) }}" class="company-link">{{ c.name }}</a></td>
+                <td>{{ c.phone or '—' }}</td>
+                <td>{{ c.email or '—' }}</td>
+                <td>{{ c.pc_count }}</td>
+                <td><a href="{{ url_for('company_pcs', cid=c.id) }}" class="btn btn-primary btn-sm">Открыть</a></td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">Нет привязанных компаний</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

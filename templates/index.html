@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Главная — SysCMS{% endblock %}
+
+{% block content %}
+<h1>📊 Панель управления</h1>
+
+<div class="stats">
+    <div class="stat-card">
+        <div class="num">{{ companies }}</div>
+        <div class="label">Компаний</div>
+    </div>
+    <div class="stat-card">
+        <div class="num">{{ pcs }}</div>
+        <div class="label">ПК в базе</div>
+    </div>
+    <div class="stat-card">
+        <div class="num">{{ sysadmins }}</div>
+        <div class="label">Сисадминов</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Быстрые действия</h3>
+    <div style="display:flex;gap:12px;margin-top:12px;">
+        <a href="{{ url_for('companies') }}" class="btn btn-primary">🏢 Компании</a>
+        <a href="{{ url_for('pcs') }}" class="btn btn-primary">🖥 ПК</a>
+        <a href="{{ url_for('sysadmins_list') }}" class="btn btn-primary">👨‍💼 Сисадмины</a>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Внешние ресурсы</h3>
+    <div style="display:flex;gap:12px;margin-top:12px;">
+        <a href="https://zabbix.example.com" target="_blank" class="btn btn-secondary">📋 Заявки</a>
+        <a href="https://zabbix.example.com" target="_blank" class="btn btn-secondary">🔴 Забикс</a>
+    </div>
+</div>
+{% endblock %}

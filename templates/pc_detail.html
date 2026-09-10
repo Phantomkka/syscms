@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}{{ pc.hostname }} — SysCMS{% endblock %}
+
+{% block content %}
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+    <a href="{{ url_for('pcs') }}" class="btn btn-secondary">← Назад к ПК</a>
+    <h1 style="margin:0;">🖥 {{ pc.hostname }}</h1>
+</div>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;">
+    <!-- Карточка ПК -->
+    <div class="card" style="flex:1;min-width:300px;">
+        <h3>🖥 Характеристики ПК</h3>
+        <table style="width:100%">
+            <tr><td style="font-weight:600;width:140px">Имя ПК:</td><td>{{ pc.hostname }}</td></tr>
+            <tr><td>CPU:</td><td>{{ pc.cpu or '—' }}</td></tr>
+            <tr><td>RAM:</td><td>{{ pc.ram or '—' }}</td></tr>
+            <tr><td>Диск:</td><td>{{ pc.hdd or '—' }}</td></tr>
+            <tr><td>OS:</td><td>{{ pc.os or '—' }}</td></tr>
+            <tr><td>IP:</td><td>{{ pc.ip or '—' }}</td></tr>
+            <tr><td>MAC:</td><td>{{ pc.mac or '—' }}</td></tr>
+            <tr><td>Инв. номер:</td><td>{{ pc.inventory_no or '—' }}</td></tr>
+            <tr><td>Создан:</td><td>{{ pc.created_at or '—' }}</td></tr>
+        </table>
+    </div>
+
+    <!-- Компания -->
+    <div class="card" style="flex:1;min-width:300px;">
+        <h3>🏢 Компания</h3>
+        <table style="width:100%">
+            <tr><td style="font-weight:600;width:140px">Название:</td><td>
+                {% if company %}<a href="{{ url_for('company_pcs', cid=company.id) }}" class="company-link">{{ company.name }}</a>{% else %}—{% endif %}
+            </td></tr>
+            {% if company %}
+            <tr><td>ИНН:</td><td>{{ company.inn or '—' }}</td></tr>
+            <tr><td>КПП:</td><td>{{ company.kpp or '—' }}</td></tr>
+            <tr><td>Телефон:</td><td>{{ company.phone or '—' }}</td></tr>
+            <tr><td>Email:</td><td>{{ company.email or '—' }}</td></tr>
+            <tr><td>Адрес:</td><td>{{ company.address or '—' }}</td></tr>
+            {% endif %}
+        </table>
+    </div>
+
+    <!-- Ответственный -->
+    <div class="card" style="flex:1;min-width:300px;">
+        <h3>👨‍💼 Ответственный</h3>
+        {% if sa %}
+        <table style="width:100%">
+            <tr><td style="font-weight:600;width:140px">ФИО:</td><td><a href="{{ url_for('sysadmin_card', sid=sa.id) }}" class="sa-link">{{ sa.full_name }}</a></td></tr>
+            <tr><td>Логин:</td><td>{{ sa.username }}</td></tr>
+            <tr><td>Telegram:</td><td>{{ sa.telegram or '—' }}</td></tr>
+            <tr><td>Телефон:</td><td>{{ sa.phone or '—' }}</td></tr>
+        </table>
+        {% else %}
+        <p style="color:#999;">Не назначен</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Генерация публичной карточки -->
+<div class="card">
+    <h3>📄 Публичная карточка</h3>
+    <p style="color:#666;font-size:13px;">Ссылка для печати/отправки: инв. номер, контакты, данные ПК</p>
+    <div style="margin-top:8px;">
+        <a href="{{ url_for('pc_card', pid=pc.id) }}" target="_blank" class="btn btn-primary">📋 Открыть карточку</a>
+        <button class="btn btn-secondary" onclick="navigator.clipboard.writeText(window.location.href.replace('/pcs/' + '{{ pc.id }}' + '/detail', '/pc-card/' + '{{ pc.id }}'))">📋 Копировать ссылку</button>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}ПК — SysCMS{% endblock %}
+
+{% block content %}
+<h1>🖥 ПК</h1>
+<a href="#" class="btn btn-primary" onclick="document.getElementById('addForm').style.display='block'; return false;">+ Добавить ПК</a>
+
+<div id="addForm" class="card" style="display:none; margin-top:16px;">
+    <h3>Новый ПК</h3>
+    <form method="POST" action="{{ url_for('pc_add') }}" class="inline">
+        <div class="form-group">
+            <label>Компания</label>
+            <select name="company_id">
+                <option value="">— Без компании —</option>
+                {% for c in companies %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Имя ПК *</label>
+            <input type="text" name="hostname" required>
+        </div>
+        <div class="form-group"><label>CPU</label><input type="text" name="cpu" placeholder="Intel i7-10700"></div>
+        <div class="form-group"><label>RAM</label><input type="text" name="ram" placeholder="16 GB"></div>
+        <div class="form-group"><label>Диск</label><input type="text" name="hdd" placeholder="512 GB SSD"></div>
+        <div class="form-group"><label>OS</label><input type="text" name="os" placeholder="Windows 11"></div>
+        <div class="form-group"><label>IP</label><input type="text" name="ip" placeholder="192.168.1.100"></div>
+        <div class="form-group"><label>MAC</label><input type="text" name="mac" placeholder="AA:BB:CC:DD:EE:FF"></div>
+        <div class="form-group"><label>Инв. номер</label><input type="text" name="inventory_no"></div>
+        <button type="submit" class="btn btn-primary">Создать</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addForm').style.display='none'">Отмена</button>
+    </form>
+</div>
+
+<div class="card" style="margin-top:20px;">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Компания</th>
+                <th>Имя ПК</th>
+                <th>CPU</th>
+                <th>RAM</th>
+                <th>OS</th>
+                <th>IP</th>
+                <th>Инв. №</th>
+                <th>Ответственный</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for p in pcs %}
+            <tr>
+                <td>{{ p.id }}</td>
+                <td>{{ p.company_name or '<span style="color:#ccc">—</span>' }}</td>
+                <td><a href="{{ url_for('pc_detail', pid=p.id) }}" class="pc-link">{{ p.hostname }}</a></td>
+                <td>{{ p.cpu or '—' }}</td>
+                <td>{{ p.ram or '—' }}</td>
+                <td>{{ p.os or '—' }}</td>
+                <td>{{ p.ip or '—' }}</td>
+                <td>{{ p.inventory_no or '—' }}</td>
+                <td>
+                    {% if p.responsible_id %}
+                        <a href="{{ url_for('sysadmin_card', sid=p.responsible_id) }}">{{ p.hostname }} (са)</a>
+                    {% else %}
+                        <span style="color:#ccc">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="actions">
+                        <button class="btn btn-primary btn-sm" onclick="editPC({{ p.id }}, {{ p.company_id or 'null' }}, '{{ p.hostname }}', '{{ p.cpu or '' }}', '{{ p.ram or '' }}', '{{ p.hdd or '' }}', '{{ p.os or '' }}', '{{ p.ip or '' }}', '{{ p.mac or '' }}', '{{ p.inventory_no or '' }}', {{ p.responsible_id or 'null' }})">✏️</button>
+                        <form method="POST" action="{{ url_for('pc_delete', pid=p.id) }}" style="display:inline" onsubmit="return confirm('Удалить ПК?')">
+                            <button class="btn btn-danger btn-sm">🗑</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="10" style="text-align:center;color:#999;padding:32px;">Нет ПК</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<form id="editFormPC" method="POST" style="display:none;">
+    <div class="card">
+        <h3>Редактирование ПК</h3>
+        <div class="form-group">
+            <label>Компания</label>
+            <select name="company_id" id="edit_p_company">
+                <option value="">— Без компании —</option>
+                {% for c in companies %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group"><label>Имя ПК *</label><input type="text" name="hostname" id="edit_p_hostname" required></div>
+        <div class="form-group"><label>CPU</label><input type="text" name="cpu" id="edit_p_cpu"></div>
+        <div class="form-group"><label>RAM</label><input type="text" name="ram" id="edit_p_ram"></div>
+        <div class="form-group"><label>Диск</label><input type="text" name="hdd" id="edit_p_hdd"></div>
+        <div class="form-group"><label>OS</label><input type="text" name="os" id="edit_p_os"></div>
+        <div class="form-group"><label>IP</label><input type="text" name="ip" id="edit_p_ip"></div>
+        <div class="form-group"><label>MAC</label><input type="text" name="mac" id="edit_p_mac"></div>
+        <div class="form-group"><label>Инв. номер</label><input type="text" name="inventory_no" id="edit_p_inv"></div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('editFormPC').style.display='none'">Отмена</button>
+    </div>
+</form>
+
+<script>
+function editPC(id, company_id, hostname, cpu, ram, hdd, os, ip, mac, inv, resp) {
+    const sel = document.getElementById('edit_p_company');
+    for (let i = 0; i < sel.options.length; i++) {
+        sel.options[i].selected = (parseInt(sel.options[i].value) === company_id);
+    }
+    document.getElementById('edit_p_hostname').value = hostname;
+    document.getElementById('edit_p_cpu').value = cpu;
+    document.getElementById('edit_p_ram').value = ram;
+    document.getElementById('edit_p_hdd').value = hdd;
+    document.getElementById('edit_p_os').value = os;
+    document.getElementById('edit_p_ip').value = ip;
+    document.getElementById('edit_p_mac').value = mac;
+    document.getElementById('edit_p_inv').value = inv || '';
+    document.getElementById('editFormPC').action = "{{ url_for('pc_edit', pid=0) }}".replace('0', id);
+    document.getElementById('editFormPC').style.display = 'block';
+    document.getElementById('editFormPC').scrollIntoView({behavior:'smooth'});
+}
+</script>
+{% endblock %}
